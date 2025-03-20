@@ -48,3 +48,33 @@ uyeNo int Foreign Key (uyeNo) references uyeler(uyeNo),
 kutuphaneNo int Foreign Key (kutuphaneNo) references kutuphane (kutuphaneNo),
 ISBN int Foreign Key (ISBN) references kitaplar(ISBN)
 );
+create table bulunur(
+ create table kütüphaneKitaplar(
+ miktar nvarchar(100) not null,
+ kutuphaneNo int Foreign Key(kutuphaneNo) REFERENCES kutuphane_t(kutuphaneNo),
+ ISBN int Foreign Key(ISBN) REFERENCES kitaplar(ISBN)
+ );
+ 
+ create table yazarlar(
+ yazarNo int not null identity(1,1) primary Key,
+ yazarAdi varchar(50),
+ yazarSoyadi varchar(50),
+ );
+ 
+ create table kitaplarYazarlar(
+ ISBN int Foreign Key(ISBN) REFERENCES kitaplar(ISBN)
+ yazarNo int Foreign Key(yazarNo) REFERENCES yazarlar(yazarNo)
+ primary key(ISBN, yazarNo)
+ );
+ 
+ create table kategoriler(
+ kategoriNo int not null identity(1,1) primary Key,
+ kategoriAdi varchar(50),
+ );
+ 
+ create table kitaplarKategoriler(
+ ISBN int Foreign Key(ISBN) REFERENCES kitaplar(ISBN)
+ kategoriNo int foreign key(kategoriNo) references kategoriler(kategoriNo),
+ primary key(ISBN, kategoriler)
+ );
+
