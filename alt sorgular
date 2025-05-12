@@ -1,0 +1,102 @@
+1. alt sorgu içerisinde dönecek değer
+tek satırda olmalı
+2. alt sorgu dışındaki 
+select update insert delete temel sorgunun where veya having kısmında yer alabilir
+3.alt sorgular parantez içerisinde 
+yer almalıdır
+4.text veya image veritipleri alt sorgularda kullanılmaz
+5.alt sorgu order by yapısını içermez
+6. alt sorgularda birleştirme işlemi kullanılmaz
+7.alt sorgu kendi FROM ifadesi veya diğer FROM ifadesinde belirtilen sutünları kullanabilir.
+8.tablo_adi.sütunadi şeklinde isimlendirebilir.
+9.temel sorgunun koşul kısmında karşılaştırılan operatörleri kulalnıldığı zaman alt sorgudan tek değer dönmesi gerekir. Alt sorgudan dönen değer birden fazlaysa koşul kısmında IN veya NOT IN gib çoklu değerleri karşılaştımak için kullanılabilir.
+
+
+!--1.	Sıla Aydoğdu'ya satılan aracın aynısından başka hangi müşterilere satıldığını bulmak için kullanılacak SQL ifadesiniz yazınız.
+select (musteri.Madi +' '+ musteri.Msoyadi) as satilan_araclar
+from satislar
+Inner Join musteri on musteri.Mno = satislar.MNo
+where aracNo =
+(select AracNo from satislar
+where MNo =(select Mno from musteri 
+where Madi ='Sıla' and Msoyadi ='Aydoğdu'))
+
+!--2.	Satış yapılan araçların bilgilerini listelemek için gerekli SQL ifadesiniz yazınız.
+select musteri.Madi,araclar.marka,araclar.model,
+satislar.Fiyat from satislar
+inner join musteri on musteri.Mno = satislar.MNo
+inner join araclar on araclar.Aracno = satislar.AracNo
+where araclar.AracNo in (select AracNo from araclar)
+
+!--3.Satış tutarı alım tutarından düşük olan araçları listelemek için gerekli SQL ifadesini yazınız.
+select s.Fiyat, a.Fiyat, m.Madi from satislar as s
+inner join alislar as a on a.AracNo=s.AracNo
+inner join musteri as m on m.Mno=s.MNo
+where s.Fiyat < a.Fiyat
+
+SELECT s.Fiyat AS satis, a.Fiyat AS alis,m.Madi
+FROM satislar AS s
+INNER JOIN alislar AS a ON a.AracNo = s.AracNo
+INNER JOIN musteri AS m ON m.Mno = s.MNo
+WHERE s.Fiyat < (
+    SELECT MIN(Fiyat) 
+    FROM alislar 
+);
+4-
+SELECT DISTINCT M.Madi, M.Soyadi
+FROM Müşteri M
+JOIN Satış S ON M.Mno = S.Mno
+JOIN Araç A ON S.Aracno = A.Aracno
+WHERE A.Marka = 'Opel'
+UNION
+SELECT DISTINCT M.Madi, M.Soyadi
+FROM Müşteri M
+JOIN Alım Al ON M.Mno = Al.Mno
+JOIN Araç A ON Al.Aracno = A.Aracno
+WHERE A.Marka = 'Opel';
+
+5-
+SELECT A.Model, A.Marka, A.Fiyat, S.Sfiyat
+FROM Araç A
+JOIN Satış S ON A.Aracno = S.Aracno
+WHERE A.Fiyat > 20000;
+
+6-
+SELECT M.Mno, M.Madi, M.Soyadi, M.Madres, M.Mtelefon
+FROM Müşteri M
+LEFT JOIN Satış S ON M.Mno = S.Mno
+LEFT JOIN Alım A ON M.Mno = A.Mno
+WHERE S.Mno IS NULL AND A.Mno IS NULL;
+
+7-
+SELECT M.Mno, M.Madi, M.Soyadi, M.Madres, M.Mtelefon
+FROM Müşteri M
+LEFT JOIN Satış S ON M.Mno = S.Mno
+LEFT JOIN Alım A ON M.Mno = A.Mno
+WHERE S.Mno IS NULL AND A.Mno IS NULL;
+
+8-
+SELECT DISTINCT M.Madi, M.Soyadi
+FROM Müşteri M
+JOIN Satış S ON M.Mno = S.Mno
+WHERE MONTH(S.Sat_tarih) IN (5, 6);
+
+9-
+SELECT M.Madi, M.Soyadi, A.Marka
+FROM Müşteri M
+JOIN Alım Al ON M.Mno = Al.Mno
+JOIN Araç A ON Al.Aracno = A.Aracno
+WHERE A.Marka IN (
+    SELECT A.Marka
+    FROM Araç A
+    JOIN Alım Al ON A.Aracno = Al.Aracno
+    GROUP BY A.Marka
+    HAVING COUNT(*) > 1
+);
+
+10-
+SELECT A.Marka, A.Fiyat, M.Madi, M.Soyadi
+FROM Araç A
+JOIN Satış S ON A.Aracno = S.Aracno
+JOIN Müşteri M ON S.Mno = M.Mno
+WHERE S.Sfiyat = (SELECT MAX(Sfiyat) FROM Satış);
